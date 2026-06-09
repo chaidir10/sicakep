@@ -520,21 +520,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="lgn-right">
     <div class="lgn-form-wrap">
       <div class="lgn-head">
-        <div class="lgn-head-title">Selamat Datang</div>
+        <div class="lgn-head-title">Selamat Datang 👋</div>
         <div class="lgn-head-sub">Masuk menggunakan akun yang diberikan oleh administrator sistem</div>
       </div>
       <div class="fgrp"><label class="flbl">Username</label><input id="lgn-u" class="finput" type="text" placeholder="Masukkan username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div class="fgrp" style="margin-bottom:18px"><label class="flbl">Password</label><input id="lgn-p" class="finput" type="password" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div id="lgn-err" class="abox aerr hidden" style="margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="lgn-err-m">Username atau password salah</span></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px 16px;font-size:13.5px;border-radius:10px;gap:8px" onclick="doLogin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Masuk ke Sistem</button>
-      <!-- <div class="lgn-divider"><span>AKUN DEMO</span></div>
+      <div class="lgn-divider"><span>AKUN DEMO</span></div>
       <div class="lgn-demo">
         <div class="demo-row"><span class="demo-role">Operator Sistem</span><span class="demo-cred">operator / pass123</span></div>
         <div class="demo-row"><span class="demo-role">Kepala Balai</span><span class="demo-cred">kabid / pass123</span></div>
         <div class="demo-row"><span class="demo-role">Kasubbag Adum</span><span class="demo-cred">kasubbag / pass123</span></div>
         <div class="demo-row"><span class="demo-role">Katimker 3</span><span class="demo-cred">katimker3 / pass123</span></div>
         <div class="demo-row"><span class="demo-role">Katimker 5</span><span class="demo-cred">katimker5 / pass123</span></div>
-      </div> -->
+      </div>
       <div style="text-align:center;margin-top:16px">
         <button class="theme-btn" onclick="toggleTheme()" style="margin:0 auto;display:inline-flex" id="lgn-theme-btn">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -2115,21 +2115,44 @@ function startAssessFor(empId){formState={step:1,empId,quarter:selectedQ,year:se
 
 function vKbBarbut(){
   const emps=RELASI.filter(r=>r.pU===currentUser.id).map(r=>getEmp(r.dE)).filter(Boolean);
-  return`<div class="topbar"><div><div class="pg-title">Barbut Ketua Tim Kerja</div><div class="pg-sub">Status bahan bukti kinerja para Ketua Tim Kerja</div></div>
+  const q=selectedQ,y=selectedY;
+  const sudah=emps.filter(e=>barbuts.find(x=>x.empId===e.id&&x.quarter===q&&x.year===y)).length;
+  const belum=emps.length-sudah;
+  const dinilai=emps.filter(e=>assessments.find(a=>a.empId===e.id&&a.quarter===q&&a.year===y&&a.assessorUserId===currentUser.id)).length;
+  return`<div class="topbar"><div><div class="pg-title">Barbut Ketua Tim Kerja</div><div class="pg-sub">Status bahan bukti kinerja para Ketua Tim Kerja · ${q} ${y}</div></div>
     <div class="tb-actions">${twFilter("showView('v-kb-barbut')")}</div></div>
-  <div class="tbl-wrap"><table>
-    <thead><tr><th>Ketua Tim Kerja</th><th>Tim Kerja</th><th>Status Barbut</th><th>Link Dokumen</th><th>Aksi</th></tr></thead>
-    <tbody>${emps.map(e=>{
-      const b=barbuts.find(x=>x.empId===e.id&&x.quarter===selectedQ&&x.year===selectedY);
-      return`<tr>
-        <td>${empRow(e)}</td>
-        <td class="fs11 txm">${getTK(e.tkId).nama}</td>
-        <td><span class="bdg ${b?'bdg-te':'bdg-re'}">${b?'Sudah Ada':'Belum Ada'}</span></td>
-        <td>${b?`<a href="${b.link}" target="_blank" class="btn btn-ghost btn-xs>${nic('exlink')} Buka Link</a>`:'<span class="fs11 txm">—</span>'}</td>
-        <td><button class="btn btn-primary btn-xs" onclick="startAssessFor(${e.id})">Nilai Sekarang</button></td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table></div>`;
+  <div class="bento" style="margin-bottom:16px">
+    <div class="card stat-card c4"><div class="s-icon bl">${nic('pegawai')}</div><div><div class="s-lbl">Total Katimker</div><div class="s-val">${emps.length}</div></div></div>
+    <div class="card stat-card c4"><div class="s-icon te">${nic('barbut')}</div><div><div class="s-lbl">Sudah Ada Barbut</div><div class="s-val">${sudah}</div></div></div>
+    <div class="card stat-card c4"><div class="s-icon re">${nic('barbut')}</div><div><div class="s-lbl">Belum Ada Barbut</div><div class="s-val">${belum}</div></div></div>
+  </div>
+  ${emps.length===0?`<div class="card"><div class="empty"><div class="empty-t">Belum ada Katimker yang ditugaskan</div><div class="empty-d">Hubungi Operator untuk mengatur relasi penilaian</div></div></div>`:`
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px">
+    ${emps.map(e=>{
+      const b=barbuts.find(x=>x.empId===e.id&&x.quarter===q&&x.year===y);
+      const assessed=assessments.find(a=>a.empId===e.id&&a.quarter===q&&a.year===y&&a.assessorUserId===currentUser.id);
+      const lu=USERS.find(u=>u.empId===e.id);
+      const photo=lu?getUserPhoto(lu.id):null;
+      return`<div onmouseenter="this.querySelector('.bov').style.opacity='1'" onmouseleave="this.querySelector('.bov').style.opacity='0'" onclick="const ov=this.querySelector('.bov');ov.style.opacity=ov.style.opacity==='1'?'0':'1'" style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4;box-shadow:0 2px 14px rgba(0,0,0,.22);cursor:pointer">
+          ${photo
+            ?`<img src="${photo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" alt="${e.init}">`
+            :`<div style="position:absolute;inset:0;background:linear-gradient(160deg,${e.c[0]},${e.c[1]});display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:800;color:rgba(255,255,255,.18)">${e.init}</div>`}
+          <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 30%,rgba(0,0,0,.82) 100%)"></div>
+          <div style="position:absolute;top:9px;left:9px;display:flex;flex-direction:column;gap:3px">
+            <span style="font-size:8px;background:${b?'rgba(0,0,0,.45)':'rgba(0,0,0,.5)'};color:${b?'var(--teal)':'#f87171'};padding:2px 8px;border-radius:5px;font-weight:700;backdrop-filter:blur(6px);border:1px solid ${b?'rgba(0,201,167,.5)':'rgba(248,113,113,.4)'}">${b?'Barbut ✓':'Belum Ada'}</span>
+            ${assessed?`<span style="font-size:8px;background:rgba(0,0,0,.45);color:#93c5fd;padding:2px 8px;border-radius:5px;font-weight:700;backdrop-filter:blur(6px);border:1px solid rgba(100,160,255,.4)">Dinilai ✓</span>`:''}
+          </div>
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:9px 10px 12px">
+            <div style="font-size:11px;font-weight:700;line-height:1.35;color:#fff;margin-bottom:2px;text-shadow:0 1px 5px rgba(0,0,0,.8);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${e.nama}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.7);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${getTK(e.tkId).nama}</div>
+          </div>
+          <div class="bov" style="position:absolute;inset:0;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:16px;opacity:0;transition:opacity .22s">
+            ${b?`<a href="${b.link}" target="_blank" onclick="event.stopPropagation()" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px 10px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);border-radius:10px;color:#fff;font-size:11px;font-weight:600;text-decoration:none;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">${nic('exlink')} Buka Dokumen</a>`:''}
+            <button onclick="event.stopPropagation();startAssessFor(${e.id})" style="width:100%;padding:9px 10px;background:var(--blue);border:none;border-radius:10px;color:#fff;font-size:11px;font-weight:700;cursor:pointer">${b?'Nilai Sekarang':'Nilai Tanpa Barbut'}</button>
+          </div>
+        </div>`;
+    }).join('')}
+  </div>`}`;
 }
 
 function vKbHasil(){
@@ -2288,21 +2311,45 @@ function initKtDashCharts(){
 
 function vKtBarbutTim(){
   const emps=myAssignedEmps();
-  return`<div class="topbar"><div><div class="pg-title">Barbut ${getTK(currentUser.timKerjaId).nama}</div><div class="pg-sub">Status bahan bukti kinerja seluruh anggota tim</div></div>
+  const q=selectedQ,y=selectedY;
+  const sudah=emps.filter(e=>barbuts.find(x=>x.empId===e.id&&x.quarter===q&&x.year===y)).length;
+  const belum=emps.length-sudah;
+  const dinilai=emps.filter(e=>assessments.find(a=>a.empId===e.id&&a.quarter===q&&a.year===y&&a.assessorUserId===currentUser.id)).length;
+  return`<div class="topbar"><div><div class="pg-title">Barbut ${getTK(currentUser.timKerjaId).nama}</div><div class="pg-sub">Status bahan bukti kinerja seluruh anggota tim · ${q} ${y}</div></div>
     <div class="tb-actions">${twFilter("showView('v-kt-barbut-tim')")}</div></div>
-  <div class="tbl-wrap"><table>
-    <thead><tr><th>Anggota Tim Kerja</th><th>Status Barbut</th><th>Keterangan</th><th>Link Dokumen</th><th>Aksi Penilai</th></tr></thead>
-    <tbody>${emps.map(e=>{
-      const b=barbuts.find(x=>x.empId===e.id&&x.quarter===selectedQ&&x.year===selectedY);
-      return`<tr>
-        <td>${empRow(e)}</td>
-        <td><span class="bdg ${b?'bdg-te':'bdg-re'}">${b?'Sudah Ada':'Belum Ada'}</span></td>
-        <td class="fs11 txm">${b?b.ket:'Belum diinput oleh pegawai'}</td>
-        <td>${b?`<a href="${b.link}" target="_blank" class="btn btn-ghost btn-xs">${nic('exlink')} Buka</a>`:'—'}</td>
-        <td><button class="btn btn-primary btn-xs" onclick="startAssessFor(${e.id})">${b?'Nilai Sekarang':'Nilai Tanpa Barbut'}</button></td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table></div>`;
+  <div class="bento" style="margin-bottom:16px">
+    <div class="card stat-card c4"><div class="s-icon bl">${nic('pegawai')}</div><div><div class="s-lbl">Total Anggota Tim</div><div class="s-val">${emps.length}</div></div></div>
+    <div class="card stat-card c4"><div class="s-icon te">${nic('barbut')}</div><div><div class="s-lbl">Sudah Ada Barbut</div><div class="s-val">${sudah}</div></div></div>
+    <div class="card stat-card c4"><div class="s-icon am">${nic('assess')}</div><div><div class="s-lbl">Sudah Dinilai</div><div class="s-val">${dinilai}</div></div></div>
+  </div>
+  ${emps.length===0?`<div class="card"><div class="empty"><div class="empty-t">Belum ada anggota tim</div><div class="empty-d">Hubungi Operator untuk mengatur relasi penilai–pegawai</div></div></div>`:`
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px">
+    ${emps.map(e=>{
+      const b=barbuts.find(x=>x.empId===e.id&&x.quarter===q&&x.year===y);
+      const assessed=assessments.find(a=>a.empId===e.id&&a.quarter===q&&a.year===y&&a.assessorUserId===currentUser.id);
+      const lu=USERS.find(u=>u.empId===e.id);
+      const photo=lu?getUserPhoto(lu.id):null;
+      return`<div onmouseenter="this.querySelector('.bov').style.opacity='1'" onmouseleave="this.querySelector('.bov').style.opacity='0'" onclick="const ov=this.querySelector('.bov');ov.style.opacity=ov.style.opacity==='1'?'0':'1'" style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4;box-shadow:0 2px 14px rgba(0,0,0,.22);cursor:pointer">
+          ${photo
+            ?`<img src="${photo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" alt="${e.init}">`
+            :`<div style="position:absolute;inset:0;background:linear-gradient(160deg,${e.c[0]},${e.c[1]});display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:800;color:rgba(255,255,255,.18)">${e.init}</div>`}
+          <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 28%,rgba(0,0,0,.85) 100%)"></div>
+          <div style="position:absolute;top:9px;left:9px;display:flex;flex-direction:column;gap:3px">
+            <span style="font-size:8px;background:${b?'rgba(0,0,0,.45)':'rgba(0,0,0,.5)'};color:${b?'var(--teal)':'#f87171'};padding:2px 8px;border-radius:5px;font-weight:700;backdrop-filter:blur(6px);border:1px solid ${b?'rgba(0,201,167,.5)':'rgba(248,113,113,.4)'}">${b?'Barbut ✓':'Belum Ada'}</span>
+            ${assessed?`<span style="font-size:8px;background:rgba(0,0,0,.45);color:#93c5fd;padding:2px 8px;border-radius:5px;font-weight:700;backdrop-filter:blur(6px);border:1px solid rgba(100,160,255,.4)">Dinilai ✓</span>`:''}
+          </div>
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:9px 10px 12px">
+            <div style="font-size:11px;font-weight:700;line-height:1.35;color:#fff;margin-bottom:2px;text-shadow:0 1px 5px rgba(0,0,0,.8);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${e.nama}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.7);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${e.jabatan}</div>
+            ${b&&b.ket?`<div style="font-size:8.5px;color:rgba(255,255,255,.5);margin-top:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-style:italic">${b.ket}</div>`:''}
+          </div>
+          <div class="bov" style="position:absolute;inset:0;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:16px;opacity:0;transition:opacity .22s">
+            ${b?`<a href="${b.link}" target="_blank" onclick="event.stopPropagation()" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px 10px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);border-radius:10px;color:#fff;font-size:11px;font-weight:600;text-decoration:none;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">${nic('exlink')} Buka Dokumen</a>`:''}
+            <button onclick="event.stopPropagation();startAssessFor(${e.id})" style="width:100%;padding:9px 10px;background:var(--blue);border:none;border-radius:10px;color:#fff;font-size:11px;font-weight:700;cursor:pointer">${b?'Nilai Sekarang':'Nilai Tanpa Barbut'}</button>
+          </div>
+        </div>`;
+    }).join('')}
+  </div>`}`;
 }
 
 /* ================================================================
